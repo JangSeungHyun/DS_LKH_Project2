@@ -10,7 +10,7 @@ private:
     std::vector<int> heap;              // Heap to implement priority queue.
     int direction;                      // It determines whether it is minHeap or maxHeap.
     int root_index;
-    int heap_size;
+    int heap_size; 
 
     void swapPQ(int idx1, int idx2);    // Swaps the elements at the speified indices in the heap.
     void upHeap(int idx);               // Adjust the heap by moving the specified element upwards.
