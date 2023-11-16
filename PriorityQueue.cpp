@@ -241,23 +241,20 @@ int PriorityQueue::popHeap() {  // Pop its top entry. If the queue is empty, the
     if (emptyHeap()) {
         std::cout<<"Empty queue."<<std::endl;
     }
-    
-    // root 노드가 어떤 자식 노드 유형을 갖는지 파악해야 함. - 인덱스로 파악해야겠지?
-    // 만약 존재하지 않는 노드면 null이라고 표시할 것을 가정하고 코드 작성
-    
-    if () {
-
-    } else if () {
-
-    }
-
 
     // root에 있는 element를 떼와서 따로 저장하기
     // root 인덱스를 변화시키기 -> 누구를 root로? right node의 가장 작은 값(leaf node)을 root로. 이렇게 되면 root_index가 변화해야하나? 1번 index에 새로운 root_node의 값 또는 데이터를 옮겨 놓으면 되는거 아닌가
-    int top_element = heap[root_index]; // 근데 top_element의 type을 int로 임의로 지정해도 되나? ㅇㅇ 나중에 printer tree를 따로 구현함
-    heap[root_index] = 0; // vector에서 비어있는 것을 어떻게 표현할까
-    // 좌우 노드 중에서 왼쪽 노드가 다음 root 노드일 수 밖에 없는 이유는 새로운 노드가 삽입될 때마다 upheap을 통해서 perfect binary tree를 유지하기 때문
-    root_index++;
+    
+    // root 노드가 어떤 자식 노드 유형을 갖는지 파악해야 함. - 인덱스로 파악해야겠지?
+    // 만약 존재하지 않는 노드면 null이라고 표시할 것을 가정하고 코드 작성
+    int top_element = heap[root_index];
+    // remove the element to be deleted
+    // Move last element
+    heap[root_index] = heap[heap_size - 1]; // 근데 top_element의 type을 int로 임의로 지정해도 되나? ㅇㅇ 나중에 printer tree를 따로 구현함
+    swapPQ(root_index, heap_size-1);
+
+    // Restore Heap properties
+    downHeap(root_index);
     // heap_size 줄이기
     heap_size--;
 
