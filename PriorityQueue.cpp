@@ -7,10 +7,16 @@ PriorityQueue::PriorityQueue(int direction) {   // Constructor.
 
     // root_index 설정 부분
     root_index = 0;
+    heap_size = 0;
     // 초기에 direction이 1, -1이 아닌 경우를 걸러내는 작업 필요할 듯
+    if (direction != 1 && direction != -1) {
+        std::cout << "Wrong direction." << std::endl;
+    }
+
+    this->direction = direction;
     
     // heap_size 멤버변수는 처음에 0으로 초기화하고 연산마다 트래킹하는게 좋을까? 아니면 필요할 때마다 vector의 메서드를 이용하여 구하는 것이 좋을까?
-    // 후자가 안정적이라고 생각. 하지만 원하는 것은 전자 같음.
+    // 후자가 안정적이라고 생각. 하지만 원하는 것은 전자 같음. -> 전자로 진행
     
 }
 
@@ -30,25 +36,29 @@ void PriorityQueue::swapPQ(int idx1, int idx2) {    // Swaps the elements at the
     // vector의 두 elements를 교환할 때 인덱스범위 초과의 기준을 array의 크기로 잡아야할까? 아니면 현재 element가 들어있는 것을 기준으로 해야할까?
     // swapPQ가 언제 호촐되지? - heap property를 유지하기 위해서 사용됨. --> upHeap, downHeap에서 호출이 될 것 같은데 여기서는 element가 실제 array 안에 존재할 때만 swap을 하지
     // 않을까? - 우선 array안에 있는 element의 수를 기준으로 구현을 해보려고 함
-    if (idx1 < heap_size && idx2 < heap_size) {
+    
+    int temp = heap[idx1];
+    heap[idx1] = heap[idx2];
+    heap[idx2] = temp;
+    // if (idx1 < heap_size && idx2 < heap_size) {
         
-        int temp = heap[idx1];
-        heap[idx1] = heap[idx2];
-        heap[idx2] = temp;
+    //     int temp = heap[idx1];
+    //     heap[idx1] = heap[idx2];
+    //     heap[idx2] = temp;
 
-    } else if (idx1 >= heap_size) {
+    // } else if (idx1 >= heap_size) {
         
-        std::cout << "idx1 is out of heap range" << std::endl;
+    //     std::cout << "idx1 is out of heap range" << std::endl;
 
 
-    } else if (idx2 >= heap_size) {
+    // } else if (idx2 >= heap_size) {
 
-        std::cout << "idx2 is out of heap range" << std:: endl;
+    //     std::cout << "idx2 is out of heap range" << std:: endl;
 
-    } else {
-        // 여기에 해당하는 상황은 없을 것 같은데?
-        std::cout << "idx1 or idx2 is out of heap range" << std::endl;
-    }
+    // } else {
+    //     // 여기에 해당하는 상황은 없을 것 같은데?
+    //     std::cout << "idx1 or idx2 is out of heap range" << std::endl;
+    // }
 
     return ;
 }
@@ -68,7 +78,7 @@ void PriorityQueue::upHeap(int idx) {   // Adjust the heap by moving the specifi
         // min heap!
         // hole을 올려보내면서(부모 노드에 있는 값을 hole로 move 시키면서)
         // 따라서 부모노드가 현재 갖고 올라가는 값보다 클 때까지만 반복문을 실행해야 함.
-        for ( ; heap[idx] > heap[(idx-1)/2]; idx=(idx-1)/2) {
+        for ( ; heap[idx] < heap[(idx-1)/2]; idx=(idx-1)/2) {
             // 부모노드에 있는 값을 hole의 위치로 보냄 -> 자연스럽게 부모노드가 hole의 역할을 하게 됨.
             swapPQ(idx, (idx-1)/2);
         }
@@ -76,7 +86,7 @@ void PriorityQueue::upHeap(int idx) {   // Adjust the heap by moving the specifi
     } else if(direction == -1) {
         // max heap!
         // 부모노드가 현재 갖고 올라가는 값보다 작을 때까지만 반복문을 실행할 것
-        for ( ; heap[idx] < heap[(idx-1)/2]; idx=(idx-1) / 2) {
+        for ( ; heap[idx] > heap[(idx-1)/2]; idx=(idx-1) / 2) {
             swapPQ(idx, (idx-1)/2);
         }
 
@@ -92,75 +102,45 @@ void PriorityQueue::downHeap(int idx) { // Adjust the heap by moving the specifi
     // pop operation이 호출되고 주로 함께 호출됨 - 양 자식노드의 값이 더 작을 때까지 - maxheap (혹은 . 더 클 때까지 - minheap) 노드를 내려보냄
 
     // base case
-
-    // direction에 따라 비교 기준 다르게 down
-    if (direction == 1) {
-        // min heap!
-        // for문 보다 while문 또는 재귀호출이 적합하다는 생각 -> 방향이 두 방향이기 때문
-        if (heap[idx] > heap[2*idx+1] && heap[idx] > heap[2*idx+2]) {
-            // 둘 다 작은 경우
-            if (heap[2*idx+1] < heap[2*idx+2]) {
-
-                swapPQ(heap[idx], heap[2*idx+1]);
-                downHeap(2*idx+1);
-
-            } else {
-
-                swapPQ(heap[idx], heap[2*idx+2]);
-                downHeap(2*idx+2);
-
-            }
-
-        } else if(heap[idx] > heap[2*idx+1] && heap[idx] <= heap[2*idx+2]) {
-            // 왼쪽 자식 노드와 swap이 필요한 경우  
-            swapPQ(heap[idx], heap[2*idx+1]);
-            downHeap(2*idx+1);
-
-        } else if (heap[idx] > heap[2*idx+2] && heap[idx] <= heap[2*idx+1]) {
-            // 오른쪽 자식 노드와 swap이 필요한 경우
-            swapPQ(heap[idx], heap[2*idx+2]);
-            downHeap(2*idx+2);
-
-        } else { // base case
-            // swap이 필요없는 경우
-            return ;
-        }
-
-    } else if (direction == -1) {
-        // max heap!
-        // for문 보다 while문 또는 재귀호출이 적합하다는 생각 -> 방향이 두 방향이기 때문
-        if (heap[idx] < heap[2*idx+1] && heap[idx] < heap[2*idx+2]) {
-            // 둘 다 작은 경우
-            if (heap[2*idx+1] > heap[2*idx+2]) {
-
-                swapPQ(heap[idx], heap[2*idx+1]);
-                downHeap(2*idx+1);
-
-            } else {
-
-                swapPQ(heap[idx], heap[2*idx+2]);
-                downHeap(2*idx+2);
-                
-            }
-
-        } else if(heap[idx] < heap[2*idx+1] && heap[idx] >= heap[2*idx+2]) {
-            // 왼쪽 자식 노드와 swap이 필요한 경우  
-            swapPQ(heap[idx], heap[2*idx+1]);
-            downHeap(2*idx+1);
-
-        } else if (heap[idx] < heap[2*idx+2] && heap[idx] >= heap[2*idx+1]) {
-            // 오른쪽 자식 노드와 swap이 필요한 경우
-            swapPQ(heap[idx], heap[2*idx+2]);
-            downHeap(2*idx+2);
-
-        } else { // base case
-            // swap이 필요없는 경우
-            return ;
-        }
-    } else {
-        // direction이 잘못된 경우?
-        std::cout<<"Wrong direction. 뜨면안됨."<<std::endl;
+    // 끝에 다다른 경우
+    if (idx >= heap_size) {
+        return;
     }
+
+    if (direction == 1) {
+        int child;
+        for (; idx * 2 + 1 <= heap_size - 1; idx = child) {
+
+            child = idx * 2 + 1;
+            if (child != heap_size - 1 && heap[child + 1] < heap[child]) {
+                ++child;
+            }
+            if(heap[child] < heap[idx]){
+                swapPQ(idx, child);        
+            } else {
+                break;
+            }
+
+        }
+
+    } else if(direction == -1) {
+
+        int child;
+        for (; idx * 2 + 1 <= heap_size - 1; idx = child) {
+
+            child = idx * 2 + 1;
+            if (child != heap_size - 1 && heap[child + 1] > heap[child]) {
+                ++child;
+            }
+            if(heap[child] > heap[idx]){
+                swapPQ(idx, child);
+            } else {
+                break;
+            }
+        }
+
+    } 
+
 
 }
 
@@ -169,10 +149,10 @@ void PriorityQueue::insertHeap(int e) { // Insert a new entry to the queue.
     // TO-DO
     // heap 끝자락에 새로운 element를 붙이는 범위로 국한시킬 예정
 
-    // // First, Check if we can use only one space.
-    // if (heap_size == heap.size() - 1) {
-    //     heap.resize(heap.size() * 2);
-    // }
+    // First, Check if we can use only one space.
+    if (heap_size == heap.size() - 1) {
+        heap.resize(heap.size() * 2);
+    }
 
     // // Percolate up hole
     // // hole의 인덱스는 제일 큰 수부터 시작 -> tree의 아랫쪽부터 시작
@@ -222,13 +202,15 @@ void PriorityQueue::insertHeap(int e) { // Insert a new entry to the queue.
 
     // define new node
     // heap_size늘리기
-    ++heap_size; // new element idx를 기억해두고 이를 upHeap 하는데 사용할 수 있지 않으려나? - ㅇㅇ 맞음.
+    int curr_idx = (++heap_size) - 1; // new element idx를 기억해두고 이를 upHeap 하는데 사용할 수 있지 않으려나? - ㅇㅇ 맞음.
     int copy_e = e;
 
     // enqueue part
     heap.push_back(e);
 
     // upHeap을 호출해야 하지 않을까? 따로 호출해야하나?
+    upHeap(curr_idx);
+
     return ;
 }
 
@@ -240,6 +222,7 @@ int PriorityQueue::popHeap() {  // Pop its top entry. If the queue is empty, the
     // 부모노드/자식노드를 인덱싱할 때 heap_size로 나눈 나머지를 이용해야 하나?
     if (emptyHeap()) {
         std::cout<<"Empty queue."<<std::endl;
+        return 0;
     }
 
     // root에 있는 element를 떼와서 따로 저장하기
@@ -250,14 +233,19 @@ int PriorityQueue::popHeap() {  // Pop its top entry. If the queue is empty, the
     int top_element = heap[root_index];
     // remove the element to be deleted
     // Move last element
-    heap[root_index] = heap[heap_size - 1]; // 근데 top_element의 type을 int로 임의로 지정해도 되나? ㅇㅇ 나중에 printer tree를 따로 구현함
+    //heap[root_index] = heap[heap_size - 1]; // 근데 top_element의 type을 int로 임의로 지정해도 되나? ㅇㅇ 나중에 printer tree를 따로 구현함
+    // last_node를 교환
     swapPQ(root_index, heap_size-1);
+    
+    // 기존 last node의 값을 지워주는 과정
+    heap.pop_back();
+
+    heap_size--;
 
     // Restore Heap properties
     downHeap(root_index);
     // heap_size 줄이기
-    heap_size--;
-
+    
 
     // return하기
     return top_element;
@@ -270,6 +258,7 @@ int PriorityQueue::topHeap() const {    // Return its top entry. If the queue is
     // heap의 top entry는 tree 모형의 root이고 이는 heap의 1번 인덱스에 위치
     if(emptyHeap()) {
         std::cout << "Empty queue." << std::endl;
+        // return 0 하면 0이 출력되는데?
         return 0;
     }
     return heap[root_index];
@@ -320,11 +309,13 @@ int Document::getPriority() const { // Getter.
 
 Printer::Printer() {    // Constructor.
     // TO-DO
+    return ;
 }
 
 
 Printer::~Printer() {   // Destructor.
     // TO-DO
+    return ;
 }
 
 
@@ -355,14 +346,18 @@ void Printer::popDoc() {    // Pop its top doc. (modifiable)
 
 Document Printer::topDoc() const {  // Returns the document with the highest priority.
     // TO-DO
+
+    return ;
 }
 
 
 int Printer::sizePrinter() const {  // Returns the size of the queue.
     // TO-DO
+    return 0;
 }
 
 
 bool Printer::emptyPrinter() const {    // Check if the queue is empty. `1` for empty queue.
     // TO-DO
+    return true;
 }
