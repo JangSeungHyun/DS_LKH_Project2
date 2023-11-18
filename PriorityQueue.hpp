@@ -36,6 +36,7 @@ private:
     int priority;                       // The priority of the document.
 
 public:
+    Document();
     Document(std::string id, std::string title, int priority);      // Constructor
 
     // Getter functions to access private members.
@@ -55,6 +56,8 @@ private:
     void upHeap(int idx);               // Adjust the heap by moving the specified element upwards.
     void downHeap(int idx);             // Adjust the heap by moving the specified element downwards.
 
+    void heapify(std::vector<Document> docs, int size, int rootIndex);
+
 public:
     Printer();                          // Constructor.
     ~Printer();                         // Destructor.
@@ -67,4 +70,6 @@ public:
     Document topDoc() const;            // Return the document with the highest priority.
     int sizePrinter() const;            // Return size of queue.
     bool emptyPrinter() const;          // Check if the queue is empty. `1` for empty queue.    
+
+    void heapSort(Printer printer, int size);
 };

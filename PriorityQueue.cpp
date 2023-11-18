@@ -194,11 +194,7 @@ void PriorityQueue::insertHeap(int e) { // Insert a new entry to the queue.
     // First, Check if we can use only one space.
     if (heap_size == heap.size() - 1) {
         heap.resize(heap.size() * 2);
-    } else {
-        // 만약 heap_size와 heap.size()가 같지 않고 뒷쪽이 아닌 앞쪽에 빈자리가 있다면? 
-        // 인덱싱을 어떻게 해야하지? - 만약 pop 과정에서 모든 element를 한 단계씩 앞으로 옮기지 않는다면 앞쪽에 공간이 생길 수 밖에 없다.
-        // 우선 idx가 0부터 (heap_size - root_index) 까지는 비어있는 것이 맞음 
-    }
+    } 
 
     // define new node
     // heap_size늘리기
@@ -289,26 +285,46 @@ bool PriorityQueue::emptyHeap() const { // Check if the queue is empty. `1` for 
 // Part 2: Document printer implementation with priority queue (60 pts)
 Document::Document(std::string id, std::string title, int priority) {   // Constructor.
     // TO-DO
+    if (id.length() > 10) {
+        std::cout << "Wrong id."<<std::endl;
+        return ;
+    }
+    this->id = id;
+    this->title = title;
+    this->priority = priority;
+
+}
+
+Document::Document() {
+
 }
 
 
 std::string Document::getId() const {   // Getter.
     // TO-DO
+    return id;
 }
 
 
 std::string Document::getTitle() const {    // Getter.
     // TO-DO
+    return title;
 }
 
 
 int Document::getPriority() const { // Getter.
     // TO-DO
+    return priority;
 }
 
 
 Printer::Printer() {    // Constructor.
     // TO-DO
+    // Printer는 minheap이다.
+
+    root_index = 0;
+    heap_size = 0; // 얘 무작정 0으로 해놔도 되나?
+
     return ;
 }
 
@@ -321,43 +337,144 @@ Printer::~Printer() {   // Destructor.
 
 void Printer::swapDoc(int idx1, int idx2) { // Swaps the elements at the specified indices in the printer.
     // TO-DO
-}
-
-
-void Printer::upHeap(int idx) { // Adjust the heap by moving the specified element upwards.
-    // TO-DO
-}
-
-
-void Printer::downHeap(int idx) {   // Adjust the heap by moving the specified element downwards.
-    // TO-DO
-}
-
-
-void Printer::insertDoc(std::string id, std::string title, int priority) {  // Insert a new doc. (modifiable)
-    // TO-DO
-}
-
-
-void Printer::popDoc() {    // Pop its top doc. (modifiable)
-    // TO-DO
-}
-
-
-Document Printer::topDoc() const {  // Returns the document with the highest priority.
-    // TO-DO
+    // PQ에서와 달리 id, title, priority를 모두 바꾸어야 한다. -> Document 클래스 자체를 swap하는 게 낫지
+    // custom class를 swap하는 방법은?
+    Document temp_docu = docs[idx1];
+    docs[idx1] = docs[idx2];
+    docs[idx2] = temp_docu;
 
     return ;
 }
 
 
+void Printer::upHeap(int idx) { // Adjust the heap by moving the specified element upwards.
+    // TO-DO
+    // min heap!
+    // hole을 올려보내면서(부모 노드에 있는 값을 hole로 move 시키면서)
+    // 따라서 부모노드가 현재 갖고 올라가는 값보다 클 때까지만 반복문을 실행해야 함.
+    for ( ; docs[idx].getPriority() < docs[(idx-1)/2].getPriority(); idx=(idx-1)/2) {
+        // 부모노드에 있는 값을 hole의 위치로 보냄 -> 자연스럽게 부모노드가 hole의 역할을 하게 됨.
+        swapDoc(idx, (idx-1)/2);
+    }
+}
+
+
+void Printer::downHeap(int idx) {   // Adjust the heap by moving the specified element downwards.
+    // TO-DO
+    int child;
+    for (; idx * 2 + 1 <= heap_size - 1; idx = child) {
+
+        child = idx * 2 + 1;
+        if (child != heap_size - 1 && docs[child + 1].getPriority() < docs[child].getPriority()) {
+            ++child;
+        }
+        if(docs[child].getPriority() < docs[idx].getPriority()){
+            swapDoc(idx, child);        
+        } else {
+            break;
+        }
+
+    }
+}
+
+
+void Printer::insertDoc(std::string id, std::string title, int priority) {  // Insert a new doc. (modifiable)
+    // TO-DO
+    // 문서를 인서트하기 전에 여유공간이 있는지 판단하고 없다면 기존 용량의 두배로 늘리기
+    if (heap_size == docs.size() - 1) {
+        docs.resize(docs.size() * 2);
+    } 
+    // define new node
+    // heap_size늘리기
+    int new_idx = (++heap_size) - 1; // new element idx를 기억해두고 이를 upHeap 하는데 사용할 수 있지 않으려나? - ㅇㅇ 맞음.
+    Document new_docu = Document(id, title, priority);
+
+    docs.push_back(new_docu);
+
+    Printer::upHeap(new_idx);
+
+    return ;
+}
+
+
+void Printer::popDoc() {    // Pop its top doc. (modifiable)
+    // TO-DO
+    if (emptyPrinter()) {
+        std::cout << "Empty queue." << std::endl;
+    }
+
+    Document top_docu = docs[root_index];
+    Printer::swapDoc(root_index, (this->heap_size) -1 );
+    docs.pop_back();
+
+    (this->heap_size)--;
+
+    downHeap(root_index);
+
+    return ;
+}
+
+
+Document Printer::topDoc() const {  // Returns the document with the highest priority.
+    // TO-DO
+    if(emptyPrinter()) {
+        std::cout << "Empty queue." << std::endl;
+        // return 0 하면 0이 출력되는데?
+        return Document(0, 0, 0);
+    }
+    return docs[root_index];
+}
+
+
 int Printer::sizePrinter() const {  // Returns the size of the queue.
     // TO-DO
-    return 0;
+    return heap_size;
 }
 
 
 bool Printer::emptyPrinter() const {    // Check if the queue is empty. `1` for empty queue.
     // TO-DO
-    return true;
+    if(heap_size == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// 배열에서 Min Heap을 유지하도록 하는 함수
+void Printer::heapify(std::vector<Document> docs, int size, int rootIndex) {
+    int smallest = rootIndex;
+    int leftChild = 2 * rootIndex + 1;
+    int rightChild = 2 * rootIndex + 2;
+
+    // 왼쪽 자식이 루트보다 작다면 smallest 갱신
+    if (leftChild < size && docs[leftChild].getPriority() < docs[smallest].getPriority()) {
+        smallest = leftChild;
+    }
+
+    // 오른쪽 자식이 루트보다 작다면 smallest 갱신
+    if (rightChild < size && docs[rightChild].getPriority() < docs[smallest].getPriority()) {
+        smallest = rightChild;
+    }
+
+    // smallest가 변경되면 루트와 smallest의 값을 교환하고 재귀적으로 heapify 호출
+    if (smallest != rootIndex) {
+        swapDoc(smallest, rootIndex);
+        heapify(docs, size, smallest);
+    }
+}
+
+void Printer::heapSort(Printer printer, int size) {
+    // 초기 Min Heap 구성
+    for (int i = size / 2 - 1; i >= 0; --i) {
+        Printer::downHeap(i);
+        //heapify(printer.docs, size, i);
+    }
+
+    // 힙 정렬 수행
+    for (int i = size - 1; i >= 0; --i) {
+        swapDoc(0, i); // 최소값(루트)을 배열 끝으로 이동
+        Printer::downHeap(0);
+        //heapify(printer.docs, i, 0); // 남은 부분을 Min Heap으로 만듬
+    }
 }
