@@ -240,8 +240,6 @@ int PriorityQueue::popHeap() {  // Pop its top entry. If the queue is empty, the
 
     // Restore Heap properties
     downHeap(root_index);
-    // heap_size 줄이기
-    
 
     // return하기
     return top_element;
@@ -296,6 +294,10 @@ Document::Document(std::string id, std::string title, int priority) {   // Const
 }
 
 Document::Document() {
+    
+    this->id = "";
+    this-> priority = 0;
+    this->title = "";
 
 }
 
@@ -420,7 +422,7 @@ Document Printer::topDoc() const {  // Returns the document with the highest pri
     if(emptyPrinter()) {
         std::cout << "Empty queue." << std::endl;
         // return 0 하면 0이 출력되는데?
-        return Document(0, 0, 0);
+        return Document();
     }
     return docs[root_index];
 }

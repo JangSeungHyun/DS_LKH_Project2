@@ -57,6 +57,7 @@ int main() {
             
         }
 
+
         // Need to print M-th Document 
         int M = 0;
         std::cin >> M;
